@@ -1,0 +1,17 @@
+info:
+  title: Transcribe API
+  version: 0.1.0
+tags: []
+paths:
+  /ping:
+    get:
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: Successful response
+      summary: Ping
+openapi: 3.0.3
+
