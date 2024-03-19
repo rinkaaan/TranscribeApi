@@ -10,8 +10,49 @@ paths:
         '200':
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: '#/components/schemas/PingOut'
           description: Successful response
       summary: Ping
 openapi: 3.0.3
+components:
+  schemas:
+    SocketTranscriptionPayload:
+      type: object
+      properties:
+        username:
+          type: string
+        room:
+          type: string
+        text:
+          type: string
+        translation:
+          type: string
+    SocketJoinLeavePayload:
+      type: object
+      properties:
+        username:
+          type: string
+        room:
+          type: string
+    SocketMessagePayload:
+      type: object
+      properties:
+        username:
+          type: string
+        room:
+          type: string
+        text:
+          type: string
+    PingOut:
+      type: object
+      properties:
+        socket_transcription_payload:
+          $ref: '#/components/schemas/SocketTranscriptionPayload'
+        socket_join_leave_payload:
+          $ref: '#/components/schemas/SocketJoinLeavePayload'
+        socket_message_payload:
+          $ref: '#/components/schemas/SocketMessagePayload'
+        message:
+          type: string
 
