@@ -4,7 +4,7 @@ from apiflask import APIFlask, HTTPBasicAuth, Schema
 from apiflask.fields import String, Nested
 from b2sdk.v2 import InMemoryAccountInfo
 from dotenv import load_dotenv
-from flask import session
+from flask import session, request
 from flask_cors import CORS
 from flask_socketio import SocketIO, join_room, emit, leave_room
 from marshmallow import post_load
@@ -35,6 +35,14 @@ class SocketTranscriptionPayload(BaseSchema):
     room = String()
     text = String()
     translation = String()
+    id = String()
+
+
+class SocketInterimTranscriptionPayload(BaseSchema):
+    username = String()
+    room = String()
+    text = String()
+    id = String()
 
 
 class SocketJoinLeavePayload(BaseSchema):
@@ -50,7 +58,7 @@ class SocketMessagePayload(BaseSchema):
 
 @socketio.on("join")
 def on_join(payload):
-    payload = SocketJoinLeavePayload().load(payload)
+    payload: SocketJoinLeavePayload = SocketJoinLeavePayload().load(payload)
     session["username"] = payload.username
     session["room"] = payload.room
     join_room(payload.room)
@@ -59,7 +67,14 @@ def on_join(payload):
         "room": payload.room,
         "text": f"{payload.username} has joined the room"
     }
-    emit("message", response, to=payload.room)
+
+    room_connections = socketio.server.manager.rooms["/"][payload.room]
+    session["id"] = request.sid
+    # print(f"Room connections: {room_connections}")
+    total_connections = len(room_connections)
+    # print(f"Total connections: {total_connections}")
+
+    emit("message", response, to=payload.room, include_self=total_connections > 1)
 
 
 @socketio.on("disconnect")
@@ -76,17 +91,33 @@ def on_disconnect():
 
 @socketio.on("transcription")
 def on_transcription(payload):
-    emit("transcription", payload, to=payload["room"])
+    payload: SocketTranscriptionPayload = SocketTranscriptionPayload().load(payload)
+    payload.id = session["id"]
+    payload.username = session["username"]
+    payload.room = session["room"]
+    # print(f"Transcription id: {payload.id}")
+    response = SocketTranscriptionPayload().dump(payload)
+    emit("transcription", response, to=payload.room, include_self=False)
+
+
+@socketio.on("interim_transcription")
+def on_interim_transcription(payload):
+    payload: SocketInterimTranscriptionPayload = SocketInterimTranscriptionPayload().load(payload)
+    payload.id = session["id"]
+    payload.username = session["username"]
+    payload.room = session["room"]
+    response = SocketInterimTranscriptionPayload().dump(payload)
+    emit("interim_transcription", response, to=payload.room, include_self=False)
 
 
 @socketio.on("message")
 def on_message(payload):
-    emit("message", payload, to=payload["room"])
+    emit("message", payload, to=session["room"])
 
 
 @socketio.on("leave")
 def on_leave(payload):
-    payload = SocketJoinLeavePayload().load(payload)
+    payload: SocketJoinLeavePayload = SocketJoinLeavePayload().load(payload)
     leave_room(payload.room)
     response = {
         "username": "Server",
@@ -100,6 +131,7 @@ class PingOut(Schema):
     socket_transcription_payload = Nested(SocketTranscriptionPayload)
     socket_join_leave_payload = Nested(SocketJoinLeavePayload)
     socket_message_payload = Nested(SocketMessagePayload)
+    socket_interim_transcription_payload = Nested(SocketInterimTranscriptionPayload)
     message = String()
 
 

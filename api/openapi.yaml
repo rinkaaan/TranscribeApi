@@ -28,6 +28,8 @@ components:
           type: string
         translation:
           type: string
+        id:
+          type: string
     SocketJoinLeavePayload:
       type: object
       properties:
@@ -44,6 +46,17 @@ components:
           type: string
         text:
           type: string
+    SocketInterimTranscriptionPayload:
+      type: object
+      properties:
+        username:
+          type: string
+        room:
+          type: string
+        text:
+          type: string
+        id:
+          type: string
     PingOut:
       type: object
       properties:
@@ -53,6 +66,8 @@ components:
           $ref: '#/components/schemas/SocketJoinLeavePayload'
         socket_message_payload:
           $ref: '#/components/schemas/SocketMessagePayload'
+        socket_interim_transcription_payload:
+          $ref: '#/components/schemas/SocketInterimTranscriptionPayload'
         message:
           type: string
 
