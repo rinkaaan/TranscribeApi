@@ -17,7 +17,7 @@ paths:
 openapi: 3.0.3
 components:
   schemas:
-    SocketTranscriptionPayload:
+    FinalTranscription:
       type: object
       properties:
         username:
@@ -30,14 +30,14 @@ components:
           type: string
         id:
           type: string
-    SocketJoinLeavePayload:
+    JoinLeaveMessage:
       type: object
       properties:
         username:
           type: string
         room:
           type: string
-    SocketMessagePayload:
+    Message:
       type: object
       properties:
         username:
@@ -46,7 +46,7 @@ components:
           type: string
         text:
           type: string
-    SocketInterimTranscriptionPayload:
+    InterimTranscription:
       type: object
       properties:
         username:
@@ -57,17 +57,22 @@ components:
           type: string
         id:
           type: string
-    PingOut:
+    SocketResources:
       type: object
       properties:
         socket_transcription_payload:
-          $ref: '#/components/schemas/SocketTranscriptionPayload'
+          $ref: '#/components/schemas/FinalTranscription'
         socket_join_leave_payload:
-          $ref: '#/components/schemas/SocketJoinLeavePayload'
+          $ref: '#/components/schemas/JoinLeaveMessage'
         socket_message_payload:
-          $ref: '#/components/schemas/SocketMessagePayload'
+          $ref: '#/components/schemas/Message'
         socket_interim_transcription_payload:
-          $ref: '#/components/schemas/SocketInterimTranscriptionPayload'
+          $ref: '#/components/schemas/InterimTranscription'
+    PingOut:
+      type: object
+      properties:
+        socket_resources:
+          $ref: '#/components/schemas/SocketResources'
         message:
           type: string
 
