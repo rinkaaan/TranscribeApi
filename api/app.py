@@ -15,6 +15,16 @@ load_dotenv()
 info = InMemoryAccountInfo()
 
 app = APIFlask(__name__, title="Transcribe API", version="0.1.0", spec_path="/openapi.yaml", docs_ui="rapidoc")
+app.servers = [
+    {
+        'name': 'Production Server',
+        'url': 'https://transcribe-api.lincolnnguyen.me'
+    },
+    {
+        'name': 'Dev Server',
+        'url': 'http://localhost:34204'
+    },
+]
 auth = HTTPBasicAuth()
 socketio = SocketIO(app, cors_allowed_origins="*")
 register_handlers(socketio)
