@@ -25,6 +25,10 @@ def register_handlers(socketio):
 
         emit("message", response, to=payload.room, include_self=total_connections > 1)
 
+    @socketio.on("update_username")
+    def on_update_username(new_username):
+        session["username"] = new_username
+
     @socketio.on("disconnect")
     def on_disconnect():
         if "username" not in session:
